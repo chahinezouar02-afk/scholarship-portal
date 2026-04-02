@@ -1,9 +1,11 @@
 # I import Flask so I can create a website
 # I also import render_template so I can send HTML files to the browser
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 # I import sqlite3 to work with a database
 import sqlite3
+
+
 
 # Here I create my web application
 # __name__ just tells Flask the name of this file
@@ -87,23 +89,42 @@ init_db()
 # When someone visits "/" (the main URL), run the function below
 @app.route("/")
 def home():
-    # Open a connection to the database
+
     conn = sqlite3.connect("internships.db")
     cursor = conn.cursor()
 
-    # Fetch ALL columns we need — requirements (s[6]) and link (s[7]) are new
-    cursor.execute("SELECT title, university, country, field, deadline, is_free, requirements, link FROM scholarships")
-    # Store all the results in a variable
-    # Each result is a tuple, like: ("CS Scholarship", "Univ of Paris", "France", ...)
-    scholarships = cursor.fetchall()
+    # Read filter choices from the URL
+    # If the user didn't pick anything, these will just be empty strings
+    country = request.args.get("country", "")
+    field = request.args.get("field", "")
+    is_free = request.args.get("is_free", "")
 
-    # Close the connection
+    # Start with a base query that fetches everything
+    query = "SELECT title, university, country, field, deadline, is_free, requirements, link FROM scholarships WHERE 1=1"
+    
+    # This list will hold the actual filter values
+    params = []
+
+    # If the user picked a country, add it to the query
+    if country:
+        query += " AND country = ?"
+        params.append(country)
+
+    # If the user picked a field, add it to the query
+    if field:
+        query += " AND field = ?"
+        params.append(field)
+
+    # If the user checked "free only", add it to the query
+    if is_free:
+        query += " AND is_free = 1"
+
+    # Run the final query with whatever filters were added
+    cursor.execute(query, params)
+    scholarships = cursor.fetchall()
     conn.close()
 
-    # Send the data to the HTML template
-    # The template can now use the variable "scholarships"
     return render_template("index.html", scholarships=scholarships)
-
 # This route is just for debugging
 # Visit /show_db in the browser to see the raw database content
 @app.route("/show_db")
