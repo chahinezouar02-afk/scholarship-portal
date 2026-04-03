@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up — Scholarship Portal</title>
+
+    <!--
+        Same Google Fonts as our main page
+        so everything looks consistent
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        /*
+            =============================================
+            GLOBAL RESET
+            Same as our main page — remove default
+            browser spacing and use border-box sizing
+            =============================================
+        */
+        * {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /*
+            =============================================
+            BODY
+            Same soft blue background as the main page.
+            "display: flex" + "justify-content: center" +
+            "align-items: center" centers the signup
+            card perfectly in the middle of the screen.
+            "min-height: 100vh" makes the body take
+            the full height of the screen.
+            =============================================
+        */
+        body {
+            background-color: #f0f4ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /*
+            =============================================
+            SIGNUP CARD
+            The white box that holds the whole form.
+            Centered on the page, rounded corners,
+            soft shadow — same style as our cards.
+            =============================================
+        */
+        .signup-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /*
+            The emoji + title at the top of the card
+        */
+        .signup-card h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b3b98;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        /*
+            Small subtitle under the title
+        */
+        .signup-card p {
+            text-align: center;
+            color: #888;
+            font-size: 0.88rem;
+            margin-bottom: 30px;
+        }
+
+        /*
+            =============================================
+            FORM GROUP
+            Each input has a label above it and the
+            input field below it. We wrap both in a
+            div called "form-group" to keep them together
+            and add spacing between each pair.
+            =============================================
+        */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /*
+            The label above each input field
+            like "Email" or "Password"
+        */
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3b3b98;
+            margin-bottom: 6px;
+        }
+
+        /*
+            The actual input fields where the user types.
+            "width: 100%" makes them stretch to full width.
+            We match the style to the rest of the app.
+        */
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0ff;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-family: 'Poppins', sans-serif;
+            color: #2d2d2d;
+            transition: border 0.2s;
+        }
+
+        /*
+            When the user clicks on an input field,
+            the border turns purple to show it's active.
+        */
+        .form-group input:focus {
+            outline: none;
+            border-color: #6c63ff;
+        }
+
+        /*
+            =============================================
+            SIGN UP BUTTON
+            Full width purple button at the bottom.
+            Same style as the filter button on main page.
+            =============================================
+        */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: #6c63ff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        /* Darker purple on hover */
+        .btn:hover {
+            background: #574fd6;
+        }
+
+        /*
+            =============================================
+            MESSAGE
+            This shows the friendly message when
+            the email is already registered.
+            It only appears if Flask sends a message.
+            Orange background — not scary red,
+            just a gentle warning color.
+            =============================================
+        */
+        .message {
+            background: #fff4e0;
+            color: #f59e0b;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /*
+            =============================================
+            LOGIN LINK
+            At the bottom of the card — "Already have
+            an account? Log in" — so the user can
+            switch to the login page easily.
+            =============================================
+        */
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* The actual clickable "Log in" link */
+        .login-link a {
+            color: #6c63ff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        /* Underline on hover so it feels clickable */
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!--
+        =============================================
+        SIGNUP CARD
+        The whole form lives inside this white box
+        =============================================
+    -->
+    <div class="signup-card">
+
+        <!-- Title and subtitle -->
+        <h1>👋 Create Account</h1>
+        <p>Join the Scholarship Portal and never miss a deadline</p>
+
+        <!--
+            If Flask sent a message (like "email already exists"),
+            show it here. This only appears when "message" exists.
+            The {{ message }} is replaced by the actual message text.
+        -->
+        {% if message %}
+            <div class="message">{{ message }}</div>
+        {% endif %}
+
+        <!--
+            =============================================
+            SIGNUP FORM
+            method="POST" means when submitted, the data
+            is sent in the background — not in the URL.
+            This is more secure for passwords.
+
+            action="/signup" means send it to our
+            signup_post() route in Flask.
+            =============================================
+        -->
+        <form method="POST" action="/signup">
+
+            <!--
+                EMAIL FIELD
+                type="email" makes the browser validate
+                that it looks like an email automatically.
+                name="email" is how Flask reads it with:
+                request.form.get("email")
+            -->
+            <div class="form-group">
+                <label>📧 Email</label>
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="you@gmail.com"
+                    required
+                >
+            </div>
+
+            <!--
+                PASSWORD FIELD
+                type="password" hides the text as dots
+                so nobody can read it over your shoulder.
+                name="password" is how Flask reads it with:
+                request.form.get("password")
+            -->
+            <div class="form-group">
+                <label>🔒 Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="choose a strong password"
+                    required
+                >
+            </div>
+
+            <!--
+                SUBMIT BUTTON
+                Clicking this sends the form to Flask.
+                Flask then checks the email, hashes
+                the password, and saves the user.
+            -->
+            <button type="submit" class="btn">Create Account →</button>
+
+        </form>
+
+        <!--
+            Link to login page for users who
+            already have an account
+        -->
+        <div class="login-link">
+            Already have an account? <a href="/login">Log in</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
