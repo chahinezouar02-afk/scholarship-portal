@@ -224,6 +224,50 @@ def show_users():
 
     # Show it as plain text in the browser
     return "<pre>" + str(data) + "</pre>"
+# This route SHOWS the login page
+# When someone visits /login in their browser, they see the form
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+
+# This route HANDLES the login form when it's submitted
+@app.route("/login", methods=["POST"])
+def login_post():
+    # Read the email and password the user typed
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    # Connect to the database
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Look for a user with this email
+    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+    user = cursor.fetchone()
+    conn.close()
+
+    # If no user found with this email, tell them
+    if not user:
+        return render_template("login.html", message="No account found with this email!")
+
+    # user[2] is the hashed password stored in the database
+    # bcrypt checks if the typed password matches the hash
+    password_matches = bcrypt.check_password_hash(user[2], password)
+
+    # If password is wrong, tell them
+    if not password_matches:
+        return render_template("login.html", message="Wrong password, try again!")
+
+    # If we get here, everything is correct!
+    # Save the user's id in the session so Flask remembers them
+    # user[0] is the id column from the database
+    session["user_id"] = user[0]
+
+    # Send them to the homepage — they are now logged in!
+    return redirect(url_for("home"))
+
+
 
 # This block only runs if we start the app directly with: python app.py
 if __name__ == "__main__":
