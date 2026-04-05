@@ -17,6 +17,10 @@ app = Flask(__name__)
 # Think of it as a password that only your server knows
 app.secret_key = "mysecretkey123"
 
+# This fixes cookie issues in development
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = False
+
 # This connects bcrypt to our app so we can hash passwords
 bcrypt = Bcrypt(app)
 
@@ -68,7 +72,7 @@ def init_db():
     # Check how many rows are already in the scholarships table
     # We do this to avoid inserting duplicate data every time the server restarts
     cursor.execute("SELECT COUNT(*) FROM scholarships")
-    count = cursor.fetchone()[0]  # fetchone() gets one result, [0] gets the number from it
+    count = cursor.fetchone()[0]
 
     # Only insert fake test data if the table is completely empty
     if count == 0:
@@ -167,48 +171,7 @@ def show_db():
     data = cursor.fetchall()
     conn.close()
 
-    # Show it as plain text in the browser so we can read it easily
     return "<pre>" + str(data) + "</pre>"
-
-# This route SHOWS the signup page
-# When someone visits /signup in their browser, they see the form
-@app.route("/signup")
-def signup():
-    return render_template("signup.html")
-
-# This route HANDLES the signup form when it's submitted
-# "POST" means this only runs when the form is submitted, not just visited
-@app.route("/signup", methods=["POST"])
-def signup_post():
-    # Read the email and password the user typed in the form
-    email = request.form.get("email")
-    password = request.form.get("password")
-
-    # Connect to the database to check if email already exists
-    conn = sqlite3.connect("internships.db")
-    cursor = conn.cursor()
-
-    # Look for a user with this exact email
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-    existing_user = cursor.fetchone()  # returns None if no user found
-
-    # If a user with this email already exists, tell them
-    if existing_user:
-        conn.close()
-        # Send them back to signup page with a friendly message
-        return render_template("signup.html", message="This email is already registered! Did you mean to log in?")
-
-    # If we get here, email is new — safe to create the account!
-    # Scramble the password into a hash so we never store it as plain text
-    hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-
-    # Save the new user in the database
-    cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, hashed_password))
-    conn.commit()
-    conn.close()
-
-    # Account created! Send them to the login page
-    return redirect(url_for("home"))
 
 # Temporary debug route to see all registered users
 # Visit /show_users in the browser to check the database
@@ -222,54 +185,103 @@ def show_users():
     data = cursor.fetchall()
     conn.close()
 
-    # Show it as plain text in the browser
     return "<pre>" + str(data) + "</pre>"
-# This route SHOWS the login page
-# When someone visits /login in their browser, they see the form
-@app.route("/login")
+
+# Debug route — shows what's inside the session right now
+# Visit /show_session after logging in to check if session is working
+@app.route("/show_session")
+def show_session():
+    return "<pre>" + str(dict(session)) + "</pre>"
+
+# This route handles both SHOWING and SUBMITTING the signup form
+# GET = someone visits /signup → just show the empty form
+# POST = someone submitted the form → process it
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        # Read the email and password the user typed in the form
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        # Connect to the database to check if email already exists
+        conn = sqlite3.connect("internships.db")
+        cursor = conn.cursor()
+
+        # Look for a user with this exact email
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        existing_user = cursor.fetchone()
+
+        # If a user with this email already exists, tell them
+        if existing_user:
+            conn.close()
+            return render_template("signup.html", message="This email is already registered! Did you mean to log in?")
+
+        # Email is new — scramble the password and save the user
+        hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
+        cursor.execute("INSERT INTO users (email, password) VALUES (?, ?)", (email, hashed_password))
+        conn.commit()
+        conn.close()
+
+        # Account created! Send them to the login page
+        return redirect(url_for("login"))
+
+    # If just visiting /signup → show the empty form
+    return render_template("signup.html")
+
+# This route handles both SHOWING and SUBMITTING the login form
+# GET = someone visits /login → just show the empty form
+# POST = someone submitted the form → check email and password
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        # Read the email and password the user typed
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        # Connect to the database
+        conn = sqlite3.connect("internships.db")
+        cursor = conn.cursor()
+
+        # Look for a user with this email
+        cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
+        user = cursor.fetchone()
+        conn.close()
+
+        # If no user found with this email, tell them
+        if not user:
+            return render_template("login.html", message="No account found with this email!")
+
+        # user[2] is the hashed password stored in the database
+        # bcrypt checks if the typed password matches the hash
+        password_matches = bcrypt.check_password_hash(user[2], password)
+
+        # If password is wrong, tell them
+        if not password_matches:
+            return render_template("login.html", message="Wrong password, try again!")
+
+        # Everything correct! Save the user id in the session
+        # This is what keeps the user logged in across pages
+        session["user_id"] = user[0]
+        print("SESSION AFTER LOGIN:", dict(session))  # this prints in the terminal
+
+        # Send them to the homepage — they are now logged in!
+        return redirect(url_for("home"))
+
+    # If just visiting /login → show the empty form
     return render_template("login.html")
 
+# This route logs the user out
+# It clears the session and sends them back to the homepage
+@app.route("/logout")
+def logout():
+    # Remove the user_id from the session
+    # This is like taking off the wristband — Flask forgets who you are
+    session.pop("user_id", None)
 
-# This route HANDLES the login form when it's submitted
-@app.route("/login", methods=["POST"])
-def login_post():
-    # Read the email and password the user typed
-    email = request.form.get("email")
-    password = request.form.get("password")
-
-    # Connect to the database
-    conn = sqlite3.connect("internships.db")
-    cursor = conn.cursor()
-
-    # Look for a user with this email
-    cursor.execute("SELECT * FROM users WHERE email = ?", (email,))
-    user = cursor.fetchone()
-    conn.close()
-
-    # If no user found with this email, tell them
-    if not user:
-        return render_template("login.html", message="No account found with this email!")
-
-    # user[2] is the hashed password stored in the database
-    # bcrypt checks if the typed password matches the hash
-    password_matches = bcrypt.check_password_hash(user[2], password)
-
-    # If password is wrong, tell them
-    if not password_matches:
-        return render_template("login.html", message="Wrong password, try again!")
-
-    # If we get here, everything is correct!
-    # Save the user's id in the session so Flask remembers them
-    # user[0] is the id column from the database
-    session["user_id"] = user[0]
-
-    # Send them to the homepage — they are now logged in!
+    # Send them back to the homepage
     return redirect(url_for("home"))
-
-
 
 # This block only runs if we start the app directly with: python app.py
 if __name__ == "__main__":
     # debug=True shows us helpful error messages while we're developing
-    app.run(debug=True)
+    app.run(debug=True, host="localhost")

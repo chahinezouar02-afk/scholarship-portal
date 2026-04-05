@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
- 
+
         /*
             =============================================
             GLOBAL RESET
@@ -45,6 +45,97 @@
         body {
             background-color: #f0f4ff;
             padding: 40px 20px;
+        }
+
+        /*
+            =============================================
+            NAVBAR
+            The bar at the very top of every page.
+            "display: flex" puts the logo on the left
+            and the buttons on the right automatically.
+            "position: sticky" makes it stay at the top
+            even when you scroll down.
+            "margin: -40px -20px 40px -20px" cancels out
+            the body padding so the navbar goes edge to edge.
+            =============================================
+        */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            margin: -40px -20px 40px -20px;
+        }
+
+        /*
+            The app name on the left side of the navbar.
+            Styled like a link but looks like a logo.
+            No underline, purple color, bold font.
+        */
+        .nav-logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #3b3b98;
+            text-decoration: none;
+        }
+
+        /*
+            The buttons container on the right side.
+            Gap adds space between the buttons.
+        */
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        /*
+            Base style shared by all navbar buttons.
+            Rounded corners, small padding, no underline.
+        */
+        .nav-btn {
+            padding: 8px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        /* Slight fade on hover for all buttons */
+        .nav-btn:hover {
+            opacity: 0.85;
+        }
+
+        /*
+            Log In button — outlined purple style
+            so it looks lighter than Sign Up
+        */
+        .nav-login {
+            background: white;
+            color: #6c63ff;
+            border: 2px solid #6c63ff;
+        }
+
+        /*
+            Sign Up button — solid purple
+            the main action we want users to take
+        */
+        .nav-signup {
+            background: #6c63ff;
+            color: white;
+        }
+
+        /*
+            Log Out button — soft red
+            so it's clearly different from the others
+        */
+        .nav-logout {
+            background: #fff0f0;
+            color: #ef4444;
         }
 
         /*
@@ -87,14 +178,11 @@
             FILTER FORM
             This is the row of dropdowns and the button
             that sits between the header and the cards.
-
             "display: flex" puts all the filter items
             in a horizontal row next to each other.
-
             "flex-wrap: wrap" means if the screen is
             small, items will wrap to the next line
             instead of going off screen.
-
             "justify-content: center" keeps everything
             centered on the page.
             =============================================
@@ -112,10 +200,8 @@
             Each dropdown (the <select> elements).
             We style them to look like our cards —
             white background, rounded corners, purple text.
-
             "appearance: none" removes the default
             ugly browser styling so our styles apply cleanly.
-
             "cursor: pointer" makes the mouse turn into
             a hand when you hover — shows it's clickable.
         */
@@ -197,14 +283,10 @@
             CARDS GRID
             This is the container that holds all the
             scholarship cards.
-
             "display: grid" turns it into a grid layout.
-
-            "repeat(auto-fill, minmax(300px, 1fr))" is
-            the magic part — it means:
-            "fit as many 300px wide columns as possible,
-            and stretch them to fill the remaining space"
-
+            "repeat(auto-fill, minmax(300px, 1fr))" means:
+            fit as many 300px wide columns as possible,
+            and stretch them to fill the remaining space.
             So on a big screen you get 3 cards per row,
             on a tablet 2, on mobile 1. Automatically!
             =============================================
@@ -222,7 +304,6 @@
             INDIVIDUAL CARD
             Each scholarship lives in one of these boxes.
             White background, rounded corners, soft shadow.
-
             "transition: transform 0.2s" prepares the card
             for a smooth hover animation (see below).
             =============================================
@@ -262,14 +343,10 @@
         /*
             These four rules give each card a different
             accent color based on its position in the grid.
-
-            nth-child(4n+1) means: every 4th card starting
-            from position 1 (cards 1, 5, 9, 13...)
+            nth-child(4n+1) means: cards 1, 5, 9, 13...
             nth-child(4n+2) means: cards 2, 6, 10, 14...
-            ...and so on.
-
-            This way the colors cycle: purple, pink,
-            green, orange, purple, pink, green, orange...
+            This way the colors cycle automatically:
+            purple → pink → green → orange → repeat
         */
         .card:nth-child(4n+1) .card-accent { background: #6c63ff; } /* purple */
         .card:nth-child(4n+2) .card-accent { background: #ff6584; } /* pink */
@@ -315,7 +392,6 @@
             The bottom section of each card.
             It holds the deadline on the left
             and the free/paid badge on the right.
-
             "display: flex" + "justify-content: space-between"
             pushes them to opposite sides automatically.
             =============================================
@@ -404,7 +480,6 @@
             If no scholarships match the filters,
             we show a friendly message instead of
             just showing nothing — that would be confusing!
-
             "grid-column: 1 / -1" makes this message
             span across ALL columns in the grid
             so it appears centered and full width.
@@ -424,6 +499,47 @@
 
     <!--
         =============================================
+        NAVBAR
+        The bar at the very top of the page.
+
+        We check if the user is logged in by looking
+        at the session variable. Flask automatically
+        makes "session" available in every template.
+
+        If session has a "user_id" → user is logged in
+        If not → user is a guest visitor
+        =============================================
+    -->
+    <nav class="navbar">
+
+        <!-- Left side — clicking the logo goes back to homepage -->
+        <a href="/" class="nav-logo">🎓 Scholarship Portal</a>
+
+        <!-- Right side — buttons change based on login status -->
+        <div class="nav-links">
+
+            <!--
+                If the user is logged in (session has user_id),
+                show only the Log Out button
+            -->
+            {% if session.get("user_id") %}
+                <a href="/logout" class="nav-btn nav-logout">Log Out</a>
+
+            <!--
+                If the user is NOT logged in,
+                show Log In and Sign Up buttons
+            -->
+            {% else %}
+                <a href="/login" class="nav-btn nav-login">Log In</a>
+                <a href="/signup" class="nav-btn nav-signup">Sign Up</a>
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+    <!--
+        =============================================
         PAGE HEADER
         Just the title and subtitle at the top.
         =============================================
@@ -438,11 +554,9 @@
         FILTER FORM
         This form lets the user filter scholarships
         by country, field, and whether it's free.
-
         method="get" means the filter choices get
         sent through the URL like this:
         /?country=France&field=Medicine&is_free=on
-
         action="/" means send the form to the
         homepage route in Flask (our home() function).
         =============================================
@@ -455,7 +569,6 @@
             The "name" attribute is how Flask
             identifies this value — it reads it with:
             request.args.get("country")
-
             The empty value="" option means "no filter"
             — show scholarships from all countries.
         -->
