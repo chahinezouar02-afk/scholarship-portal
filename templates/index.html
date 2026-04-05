@@ -476,6 +476,40 @@
 
         /*
             =============================================
+            SAVE BUTTON
+            Sits below the apply button on each card.
+            Outlined purple style so it doesn't compete
+            with the solid purple apply button.
+            Only shows up when the user is logged in.
+            =============================================
+        */
+        .save-btn {
+            display: block;
+            text-align: center;
+            margin-top: 8px;
+            padding: 10px;
+            background: white;
+            color: #6c63ff;
+            border: 2px solid #6c63ff;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        /*
+            When hovering the save button,
+            it fills with purple — same as apply button.
+            This gives clear visual feedback.
+        */
+        .save-btn:hover {
+            background: #6c63ff;
+            color: white;
+        }
+
+        /*
+            =============================================
             EMPTY STATE
             If no scholarships match the filters,
             we show a friendly message instead of
@@ -501,13 +535,8 @@
         =============================================
         NAVBAR
         The bar at the very top of the page.
-
-        We check if the user is logged in by looking
-        at the session variable. Flask automatically
-        makes "session" available in every template.
-
-        If session has a "user_id" → user is logged in
-        If not → user is a guest visitor
+        Flask automatically makes "session" available
+        in every template so we can check login status.
         =============================================
     -->
     <nav class="navbar">
@@ -520,9 +549,10 @@
 
             <!--
                 If the user is logged in (session has user_id),
-                show only the Log Out button
+                show My List link and Log Out button
             -->
             {% if session.get("user_id") %}
+                <a href="/my-list" class="nav-btn nav-login">📋 My List</a>
                 <a href="/logout" class="nav-btn nav-logout">Log Out</a>
 
             <!--
@@ -552,26 +582,13 @@
     <!--
         =============================================
         FILTER FORM
-        This form lets the user filter scholarships
-        by country, field, and whether it's free.
-        method="get" means the filter choices get
-        sent through the URL like this:
-        /?country=France&field=Medicine&is_free=on
-        action="/" means send the form to the
-        homepage route in Flask (our home() function).
+        method="get" sends filters through the URL.
+        action="/" sends it to our home() route.
         =============================================
     -->
     <form class="filters" method="get" action="/">
 
-        <!--
-            COUNTRY DROPDOWN
-            The user picks a country here.
-            The "name" attribute is how Flask
-            identifies this value — it reads it with:
-            request.args.get("country")
-            The empty value="" option means "no filter"
-            — show scholarships from all countries.
-        -->
+        <!-- Country dropdown -->
         <select name="country">
             <option value="">🌍 All Countries</option>
             <option value="France">France</option>
@@ -580,12 +597,7 @@
             <option value="USA">USA</option>
         </select>
 
-        <!--
-            FIELD DROPDOWN
-            Same idea as country — user picks
-            a field of study. Flask reads it with:
-            request.args.get("field")
-        -->
+        <!-- Field dropdown -->
         <select name="field">
             <option value="">📚 All Fields</option>
             <option value="Computer Science">Computer Science</option>
@@ -594,26 +606,13 @@
             <option value="Engineering">Engineering</option>
         </select>
 
-        <!--
-            FREE ONLY CHECKBOX
-            If the user checks this, the browser
-            sends is_free=on to Flask.
-            If unchecked, nothing is sent at all.
-            Flask reads it with:
-            request.args.get("is_free")
-        -->
+        <!-- Free only checkbox -->
         <label>
             <input type="checkbox" name="is_free">
             ✅ Free only
         </label>
 
-        <!--
-            FILTER BUTTON
-            When clicked, this submits the form
-            and sends all the filter choices to Flask.
-            Flask then runs the right database query
-            and returns only matching scholarships.
-        -->
+        <!-- Submit button -->
         <button type="submit">🔍 Filter</button>
 
     </form>
@@ -621,75 +620,60 @@
     <!--
         =============================================
         SCHOLARSHIPS GRID
-        This div holds all the scholarship cards.
-        Flask already fetched the data from the database
-        and passed it here as the "scholarships" variable.
+        Flask fetched the data and passed it here
+        as the "scholarships" variable.
+
+        Each row "s" is now a tuple like:
+        (id, title, university, country, field,
+         deadline, is_free, requirements, link)
+         s[0] s[1]  s[2]       s[3]     s[4]
+         s[5]    s[6]     s[7]         s[8]
         =============================================
     -->
     <div class="grid">
 
-        <!--
-            LOOP THROUGH ALL SCHOLARSHIPS
-            Jinja2 (Flask's template engine) loops
-            through every scholarship in the list.
-            Each one is temporarily called "s".
-
-            Remember: s is a tuple that looks like:
-            ("Title", "University", "Country", "Field",
-             "Deadline", is_free, "Requirements", "Link")
-              s[0]      s[1]        s[2]      s[3]
-              s[4]       s[5]        s[6]       s[7]
-        -->
         {% for s in scholarships %}
 
-            <!-- One card for each scholarship -->
             <div class="card">
 
-                <!--
-                    Colored accent bar at the top.
-                    The color is automatically assigned
-                    by CSS based on the card's position.
-                -->
+                <!-- Colored accent bar — color set by CSS automatically -->
                 <div class="card-accent"></div>
 
-                <!-- s[0] = title of the scholarship -->
-                <h2>{{ s[0] }}</h2>
+                <!-- s[1] = title -->
+                <h2>{{ s[1] }}</h2>
 
-                <!-- s[1] = university that offers it -->
+                <!-- s[2] = university -->
                 <div class="card-info">
-                    <span>🏫 University:</span> {{ s[1] }}
+                    <span>🏫 University:</span> {{ s[2] }}
                 </div>
 
-                <!-- s[2] = country where it's located -->
+                <!-- s[3] = country -->
                 <div class="card-info">
-                    <span>🌍 Country:</span> {{ s[2] }}
+                    <span>🌍 Country:</span> {{ s[3] }}
                 </div>
 
-                <!-- s[3] = field of study -->
+                <!-- s[4] = field -->
                 <div class="card-info">
-                    <span>📚 Field:</span> {{ s[3] }}
+                    <span>📚 Field:</span> {{ s[4] }}
                 </div>
 
-                <!-- s[6] = requirements to apply -->
+                <!-- s[7] = requirements -->
                 <div class="card-info">
-                    <span>📋 Requirements:</span> {{ s[6] }}
+                    <span>📋 Requirements:</span> {{ s[7] }}
                 </div>
 
-                <!--
-                    CARD FOOTER
-                    Deadline on the left, free/paid badge on the right.
-                -->
+                <!-- Footer: deadline + free/paid badge -->
                 <div class="card-footer">
 
-                    <!-- s[4] = application deadline date -->
-                    <div class="deadline">⏰ Deadline: {{ s[4] }}</div>
+                    <!-- s[5] = deadline -->
+                    <div class="deadline">⏰ Deadline: {{ s[5] }}</div>
 
                     <!--
-                        s[5] = is_free (1 or 0)
-                        If it's 1 (free) → show green "Free" badge
-                        If it's 0 (has fees) → show red "Has Fees" badge
+                        s[6] = is_free
+                        1 = free → green badge
+                        0 = has fees → red badge
                     -->
-                    {% if s[5] == 1 %}
+                    {% if s[6] == 1 %}
                         <span class="badge badge-free">✅ Free</span>
                     {% else %}
                         <span class="badge badge-paid">💰 Has Fees</span>
@@ -697,27 +681,24 @@
 
                 </div>
 
+                <!-- s[8] = link — opens in new tab -->
+                <a href="{{ s[8] }}" target="_blank" class="apply-btn">Apply Now →</a>
+
                 <!--
-                    APPLY BUTTON
-                    s[7] = the official application link
-                    target="_blank" opens it in a new tab
-                    so the user doesn't leave our site.
+                    SAVE BUTTON
+                    Only shows if the user is logged in.
+                    Sends s[0] (the scholarship id) to Flask
+                    so it knows which one to save.
                 -->
-                <a href="{{ s[7] }}" target="_blank" class="apply-btn">Apply Now →</a>
+                {% if session.get("user_id") %}
+                    <a href="/save/{{ s[0] }}" class="save-btn">🔖 Save to My List</a>
+                {% endif %}
 
             </div>
 
-        <!-- End of the scholarship loop -->
         {% endfor %}
 
-        <!--
-            EMPTY STATE MESSAGE
-            If no scholarships matched the filters,
-            the "scholarships" list will be empty.
-            We show a friendly message so the user
-            knows what happened instead of seeing
-            a blank page with no explanation.
-        -->
+        <!-- Show this if no scholarships matched the filters -->
         {% if not scholarships %}
             <div class="empty">😕 No scholarships found. Try different filters!</div>
         {% endif %}

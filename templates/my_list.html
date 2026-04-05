@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My List — Scholarship Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f0f4ff; padding: 40px 20px; }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            margin: -40px -20px 40px -20px;
+        }
+        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #3b3b98; text-decoration: none; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-btn { padding: 8px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+        .nav-btn:hover { opacity: 0.85; }
+        .nav-login { background: white; color: #6c63ff; border: 2px solid #6c63ff; }
+        .nav-logout { background: #fff0f0; color: #ef4444; }
+
+        /* Page title */
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; font-weight: 700; color: #3b3b98; }
+        .header p { color: #888; font-size: 1rem; margin-top: 8px; }
+
+        /* Cards grid — same as homepage */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-accent { height: 6px; border-radius: 10px; margin-bottom: 16px; }
+        .card:nth-child(4n+1) .card-accent { background: #6c63ff; }
+        .card:nth-child(4n+2) .card-accent { background: #ff6584; }
+        .card:nth-child(4n+3) .card-accent { background: #43c6ac; }
+        .card:nth-child(4n+4) .card-accent { background: #f7971e; }
+        .card h2 { font-size: 1.1rem; font-weight: 700; color: #2d2d2d; margin-bottom: 12px; }
+        .card-info { font-size: 0.88rem; color: #555; margin-bottom: 8px; }
+        .card-info span { font-weight: 600; color: #3b3b98; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+        .deadline { font-size: 0.8rem; color: #888; }
+        .badge { font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+        .badge-free { background: #e0fdf4; color: #10b981; }
+        .badge-paid { background: #fff0f0; color: #ef4444; }
+
+        /* Apply button */
+        .apply-btn { display: block; text-align: center; margin-top: 14px; padding: 10px; background: #6c63ff; color: white; border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: background 0.2s; }
+        .apply-btn:hover { background: #574fd6; }
+
+        /*
+            REMOVE BUTTON
+            Red outlined button to remove a scholarship
+            from the user's saved list.
+        */
+        .remove-btn { display: block; text-align: center; margin-top: 8px; padding: 10px; background: white; color: #ef4444; border: 2px solid #ef4444; border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: all 0.2s; }
+        .remove-btn:hover { background: #ef4444; color: white; }
+
+        /* Empty state */
+        .empty { text-align: center; color: #888; font-size: 1rem; margin-top: 60px; grid-column: 1 / -1; }
+        .empty a { color: #6c63ff; font-weight: 600; text-decoration: none; }
+        .empty a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="nav-logo">🎓 Scholarship Portal</a>
+        <div class="nav-links">
+            <a href="/" class="nav-btn nav-login">🏠 Home</a>
+            <a href="/logout" class="nav-btn nav-logout">Log Out</a>
+        </div>
+    </nav>
+
+    <!-- Page header -->
+    <div class="header">
+        <h1>📋 My Saved List</h1>
+        <p>Track your scholarships and never miss a deadline</p>
+    </div>
+
+    <!--
+        Cards grid — same structure as homepage.
+        Each row "s" is:
+        (id, title, university, country, field,
+         deadline, is_free, requirements, link)
+         s[0] s[1]  s[2]       s[3]     s[4]
+         s[5]    s[6]     s[7]         s[8]
+    -->
+    <div class="grid">
+
+        {% for s in scholarships %}
+            <div class="card">
+
+                <div class="card-accent"></div>
+
+                <!-- s[1] = title -->
+                <h2>{{ s[1] }}</h2>
+
+                <!-- s[2] = university -->
+                <div class="card-info">
+                    <span>🏫 University:</span> {{ s[2] }}
+                </div>
+
+                <!-- s[3] = country -->
+                <div class="card-info">
+                    <span>🌍 Country:</span> {{ s[3] }}
+                </div>
+
+                <!-- s[4] = field -->
+                <div class="card-info">
+                    <span>📚 Field:</span> {{ s[4] }}
+                </div>
+
+                <!-- s[7] = requirements -->
+                <div class="card-info">
+                    <span>📋 Requirements:</span> {{ s[7] }}
+                </div>
+
+                <div class="card-footer">
+                    <!-- s[5] = deadline -->
+                    <div class="deadline">⏰ Deadline: {{ s[5] }}</div>
+
+                    <!-- s[6] = is_free -->
+                    {% if s[6] == 1 %}
+                        <span class="badge badge-free">✅ Free</span>
+                    {% else %}
+                        <span class="badge badge-paid">💰 Has Fees</span>
+                    {% endif %}
+                </div>
+
+                <!-- s[8] = link -->
+                <a href="{{ s[8] }}" target="_blank" class="apply-btn">Apply Now →</a>
+
+                <!--
+                    REMOVE BUTTON
+                    Sends the scholarship id to Flask
+                    which removes it from the saved list.
+                -->
+                <a href="/remove/{{ s[0] }}" class="remove-btn">🗑️ Remove from List</a>
+
+            </div>
+        {% endfor %}
+
+        <!--
+            If the list is empty, show a friendly message
+            with a link back to the homepage to find scholarships.
+        -->
+        {% if not scholarships %}
+            <div class="empty">
+                😕 You haven't saved any scholarships yet!<br><br>
+                <a href="/">Browse scholarships →</a>
+            </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

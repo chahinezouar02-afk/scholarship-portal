@@ -68,6 +68,30 @@ def init_db():
             password TEXT NOT NULL
         )
     """)
+    
+    # Create the saved_scholarships table
+# This connects users to scholarships they want to track
+# user_id = which user saved it
+# scholarship_id = which scholarship they saved
+# saved_at = when they saved it (automatically set to now)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS saved_scholarships (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            scholarship_id INTEGER NOT NULL,
+            saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     # Check how many rows are already in the scholarships table
     # We do this to avoid inserting duplicate data every time the server restarts
@@ -133,7 +157,7 @@ def home():
     is_free = request.args.get("is_free", "")
 
     # Start with a base query that fetches everything
-    query = "SELECT title, university, country, field, deadline, is_free, requirements, link FROM scholarships WHERE 1=1"
+    query = "SELECT id, title, university, country, field, deadline, is_free, requirements, link FROM scholarships WHERE 1=1"
 
     # This list will hold the actual filter values
     params = []
@@ -280,6 +304,113 @@ def logout():
 
     # Send them back to the homepage
     return redirect(url_for("home"))
+
+
+# This route saves a scholarship to the user's personal list
+# It only works if the user is logged in
+@app.route("/save/<int:scholarship_id>")
+def save_scholarship(scholarship_id):
+
+    # Check if the user is logged in
+    # If not, send them to the login page
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    # Get the logged in user's id from the session
+    user_id = session["user_id"]
+
+    # Connect to the database
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Check if this scholarship is already saved by this user
+    # We don't want duplicates in the list
+    cursor.execute("""
+        SELECT * FROM saved_scholarships 
+        WHERE user_id = ? AND scholarship_id = ?
+    """, (user_id, scholarship_id))
+    already_saved = cursor.fetchone()
+
+    # Only save it if it's not already in the list
+    if not already_saved:
+        cursor.execute("""
+            INSERT INTO saved_scholarships (user_id, scholarship_id)
+            VALUES (?, ?)
+        """, (user_id, scholarship_id))
+        conn.commit()
+
+    conn.close()
+
+    # Send them back to the homepage after saving
+    return redirect(url_for("home"))
+
+# This route shows the user's personal saved scholarships list
+# Only logged in users can see this page
+@app.route("/my-list")
+def my_list():
+
+    # If the user is not logged in, send them to login page
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    # Get the logged in user's id
+    user_id = session["user_id"]
+
+    # Connect to the database
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Fetch all scholarships that this user saved
+    # We JOIN two tables together:
+    # saved_scholarships (which has user_id and scholarship_id)
+    # scholarships (which has all the scholarship details)
+    # JOIN means: "connect rows from both tables where the ids match"
+    cursor.execute("""
+        SELECT s.id, s.title, s.university, s.country, s.field,
+               s.deadline, s.is_free, s.requirements, s.link
+        FROM scholarships s
+        JOIN saved_scholarships ss ON s.id = ss.scholarship_id
+        WHERE ss.user_id = ?
+        ORDER BY s.deadline ASC
+    """, (user_id,))
+
+    scholarships = cursor.fetchall()
+    conn.close()
+
+    # Send the saved scholarships to the my-list page
+    return render_template("my_list.html", scholarships=scholarships)
+
+# This route removes a scholarship from the user's saved list
+@app.route("/remove/<int:scholarship_id>")
+def remove_scholarship(scholarship_id):
+
+    # If not logged in, send to login
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Delete only this user's saved entry for this scholarship
+    # We check both user_id AND scholarship_id so users
+    # can only remove their OWN saved scholarships
+    cursor.execute("""
+        DELETE FROM saved_scholarships
+        WHERE user_id = ? AND scholarship_id = ?
+    """, (user_id, scholarship_id))
+
+    conn.commit()
+    conn.close()
+
+    # Send them back to their list
+    return redirect(url_for("my_list"))
+
+
+
+
+
 
 # This block only runs if we start the app directly with: python app.py
 if __name__ == "__main__":
