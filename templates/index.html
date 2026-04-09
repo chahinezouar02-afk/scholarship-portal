@@ -2,593 +2,80 @@
 <html>
 <head>
     <title>Scholarship Portal</title>
-
-    <!--
-        =============================================
-        GOOGLE FONTS
-        We're importing a font called "Poppins"
-        from the internet. It's a clean, round,
-        friendly looking font — perfect for our app!
-        =============================================
-    -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
     <style>
+        * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f0f4ff; padding: 40px 20px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; margin: -40px -20px 40px -20px; }
+        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #3b3b98; text-decoration: none; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-btn { padding: 8px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+        .nav-btn:hover { opacity: 0.85; }
+        .nav-login { background: white; color: #6c63ff; border: 2px solid #6c63ff; }
+        .nav-signup { background: #6c63ff; color: white; }
+        .nav-logout { background: #fff0f0; color: #ef4444; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; font-weight: 700; color: #3b3b98; }
+        .header p { color: #888; font-size: 1rem; margin-top: 8px; }
+        .filters { display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 40px; }
+        .filters select { padding: 10px 16px; border-radius: 10px; border: 2px solid #e0e0ff; background: white; color: #3b3b98; font-size: 0.88rem; font-family: 'Poppins', sans-serif; cursor: pointer; appearance: none; padding-right: 30px; transition: border 0.2s; }
+        .filters select:focus { outline: none; border-color: #6c63ff; }
+        .filters label { display: flex; align-items: center; gap: 6px; font-size: 0.88rem; color: #3b3b98; cursor: pointer; background: white; padding: 10px 16px; border-radius: 10px; border: 2px solid #e0e0ff; }
+        .filters button { padding: 10px 24px; background: #6c63ff; color: white; border: none; border-radius: 10px; font-size: 0.88rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .filters button:hover { background: #574fd6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+        .card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card-accent { height: 6px; border-radius: 10px; margin-bottom: 16px; }
+        .card:nth-child(4n+1) .card-accent { background: #6c63ff; }
+        .card:nth-child(4n+2) .card-accent { background: #ff6584; }
+        .card:nth-child(4n+3) .card-accent { background: #43c6ac; }
+        .card:nth-child(4n+4) .card-accent { background: #f7971e; }
+        .card h2 { font-size: 1.1rem; font-weight: 700; color: #2d2d2d; margin-bottom: 12px; }
+        .card-info { font-size: 0.88rem; color: #555; margin-bottom: 8px; }
+        .card-info span { font-weight: 600; color: #3b3b98; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+        .deadline { font-size: 0.8rem; color: #888; }
+        .badge { font-size: 0.75rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+        .badge-free { background: #e0fdf4; color: #10b981; }
+        .badge-paid { background: #fff0f0; color: #ef4444; }
 
-        /*
-            =============================================
-            GLOBAL RESET
-            By default, browsers add their own spacing
-            and sizing to elements. We reset all of that
-            here so we have full control over the design.
-            "box-sizing: border-box" makes sizing easier
-            to work with — padding won't break our layout.
-            =============================================
-        */
-        * {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Apply button — solid purple */
+        .apply-btn { display: block; text-align: center; margin-top: 14px; padding: 10px; background: #6c63ff; color: white; border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: background 0.2s; }
+        .apply-btn:hover { background: #574fd6; }
 
-        /*
-            =============================================
-            BODY
-            This styles the entire page background.
-            We use a soft blue-white color so it feels
-            light and friendly, not harsh white.
-            Padding adds space around all the content
-            so nothing is stuck to the edges.
-            =============================================
-        */
-        body {
-            background-color: #f0f4ff;
-            padding: 40px 20px;
-        }
+        /* Details button — green outlined */
+        .details-btn { display: block; text-align: center; margin-top: 8px; padding: 10px; background: white; color: #10b981; border: 2px solid #10b981; border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: all 0.2s; }
+        .details-btn:hover { background: #10b981; color: white; }
 
-        /*
-            =============================================
-            NAVBAR
-            The bar at the very top of every page.
-            "display: flex" puts the logo on the left
-            and the buttons on the right automatically.
-            "position: sticky" makes it stay at the top
-            even when you scroll down.
-            "margin: -40px -20px 40px -20px" cancels out
-            the body padding so the navbar goes edge to edge.
-            =============================================
-        */
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 40px;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-            position: sticky;
-            top: 0;
-            margin: -40px -20px 40px -20px;
-        }
+        /* Save button — purple outlined */
+        .save-btn { display: block; text-align: center; margin-top: 8px; padding: 10px; background: white; color: #6c63ff; border: 2px solid #6c63ff; border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600; transition: all 0.2s; }
+        .save-btn:hover { background: #6c63ff; color: white; }
 
-        /*
-            The app name on the left side of the navbar.
-            Styled like a link but looks like a logo.
-            No underline, purple color, bold font.
-        */
-        .nav-logo {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #3b3b98;
-            text-decoration: none;
-        }
-
-        /*
-            The buttons container on the right side.
-            Gap adds space between the buttons.
-        */
-        .nav-links {
-            display: flex;
-            gap: 10px;
-        }
-
-        /*
-            Base style shared by all navbar buttons.
-            Rounded corners, small padding, no underline.
-        */
-        .nav-btn {
-            padding: 8px 20px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-
-        /* Slight fade on hover for all buttons */
-        .nav-btn:hover {
-            opacity: 0.85;
-        }
-
-        /*
-            Log In button — outlined purple style
-            so it looks lighter than Sign Up
-        */
-        .nav-login {
-            background: white;
-            color: #6c63ff;
-            border: 2px solid #6c63ff;
-        }
-
-        /*
-            Sign Up button — solid purple
-            the main action we want users to take
-        */
-        .nav-signup {
-            background: #6c63ff;
-            color: white;
-        }
-
-        /*
-            Log Out button — soft red
-            so it's clearly different from the others
-        */
-        .nav-logout {
-            background: #fff0f0;
-            color: #ef4444;
-        }
-
-        /*
-            =============================================
-            HEADER
-            This is the top section with the title
-            and subtitle. We center everything here.
-            margin-bottom pushes the cards down a bit
-            so the header has room to breathe.
-            =============================================
-        */
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        /*
-            The big title "🎓 Scholarship Portal"
-            Large, bold, and dark purple colored.
-        */
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #3b3b98;
-        }
-
-        /*
-            The smaller subtitle below the title.
-            Light grey color so it doesn't compete
-            with the main title.
-        */
-        .header p {
-            color: #888;
-            font-size: 1rem;
-            margin-top: 8px;
-        }
-
-        /*
-            =============================================
-            FILTER FORM
-            This is the row of dropdowns and the button
-            that sits between the header and the cards.
-            "display: flex" puts all the filter items
-            in a horizontal row next to each other.
-            "flex-wrap: wrap" means if the screen is
-            small, items will wrap to the next line
-            instead of going off screen.
-            "justify-content: center" keeps everything
-            centered on the page.
-            =============================================
-        */
-        .filters {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 40px;
-        }
-
-        /*
-            Each dropdown (the <select> elements).
-            We style them to look like our cards —
-            white background, rounded corners, purple text.
-            "appearance: none" removes the default
-            ugly browser styling so our styles apply cleanly.
-            "cursor: pointer" makes the mouse turn into
-            a hand when you hover — shows it's clickable.
-        */
-        .filters select {
-            padding: 10px 16px;
-            border-radius: 10px;
-            border: 2px solid #e0e0ff;
-            background: white;
-            color: #3b3b98;
-            font-size: 0.88rem;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            appearance: none;
-            padding-right: 30px;
-            transition: border 0.2s;
-        }
-
-        /*
-            When you click on a dropdown to open it,
-            the border turns purple to show it's active.
-            "outline: none" removes the default blue
-            browser outline that appears on focus.
-        */
-        .filters select:focus {
-            outline: none;
-            border-color: #6c63ff;
-        }
-
-        /*
-            The "Free only" checkbox + its label text.
-            We wrap both in a <label> so clicking the
-            text also checks the checkbox — better UX!
-            We style it like a button to match the dropdowns.
-        */
-        .filters label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.88rem;
-            color: #3b3b98;
-            cursor: pointer;
-            background: white;
-            padding: 10px 16px;
-            border-radius: 10px;
-            border: 2px solid #e0e0ff;
-        }
-
-        /*
-            The purple "Filter" button.
-            Bold white text on purple background.
-            "transition" makes the color change smooth
-            when you hover instead of instant.
-        */
-        .filters button {
-            padding: 10px 24px;
-            background: #6c63ff;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.88rem;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        /*
-            When you hover over the filter button,
-            it gets a slightly darker purple.
-            This gives the user visual feedback
-            that the button is clickable.
-        */
-        .filters button:hover {
-            background: #574fd6;
-        }
-
-        /*
-            =============================================
-            CARDS GRID
-            This is the container that holds all the
-            scholarship cards.
-            "display: grid" turns it into a grid layout.
-            "repeat(auto-fill, minmax(300px, 1fr))" means:
-            fit as many 300px wide columns as possible,
-            and stretch them to fill the remaining space.
-            So on a big screen you get 3 cards per row,
-            on a tablet 2, on mobile 1. Automatically!
-            =============================================
-        */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        /*
-            =============================================
-            INDIVIDUAL CARD
-            Each scholarship lives in one of these boxes.
-            White background, rounded corners, soft shadow.
-            "transition: transform 0.2s" prepares the card
-            for a smooth hover animation (see below).
-            =============================================
-        */
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            transition: transform 0.2s;
-        }
-
-        /*
-            When you hover over a card, it moves up
-            by 5 pixels. Combined with the transition
-            above, this creates a smooth "lift" effect.
-            It makes the page feel alive and interactive!
-        */
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        /*
-            =============================================
-            CARD ACCENT BAR
-            The little colored stripe at the top of
-            each card. It's just a thin rectangle.
-            The actual color is set below using nth-child.
-            =============================================
-        */
-        .card-accent {
-            height: 6px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-        }
-
-        /*
-            These four rules give each card a different
-            accent color based on its position in the grid.
-            nth-child(4n+1) means: cards 1, 5, 9, 13...
-            nth-child(4n+2) means: cards 2, 6, 10, 14...
-            This way the colors cycle automatically:
-            purple → pink → green → orange → repeat
-        */
-        .card:nth-child(4n+1) .card-accent { background: #6c63ff; } /* purple */
-        .card:nth-child(4n+2) .card-accent { background: #ff6584; } /* pink */
-        .card:nth-child(4n+3) .card-accent { background: #43c6ac; } /* green */
-        .card:nth-child(4n+4) .card-accent { background: #f7971e; } /* orange */
-
-        /*
-            The scholarship title inside the card.
-            Bigger and bolder than the other text
-            so it stands out as the main info.
-        */
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #2d2d2d;
-            margin-bottom: 12px;
-        }
-
-        /*
-            Each row of info inside the card
-            like "🌍 Country: France"
-            Small text, slightly grey, spaced out.
-        */
-        .card-info {
-            font-size: 0.88rem;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        /*
-            The label part of each info row
-            like "🌍 Country:" — bold and purple
-            so it's easy to scan quickly.
-        */
-        .card-info span {
-            font-weight: 600;
-            color: #3b3b98;
-        }
-
-        /*
-            =============================================
-            CARD FOOTER
-            The bottom section of each card.
-            It holds the deadline on the left
-            and the free/paid badge on the right.
-            "display: flex" + "justify-content: space-between"
-            pushes them to opposite sides automatically.
-            =============================================
-        */
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        /*
-            The deadline text — small and grey
-            because it's secondary info.
-        */
-        .deadline {
-            font-size: 0.8rem;
-            color: #888;
-        }
-
-        /*
-            The badge that says "Free" or "Has Fees"
-            Base styles shared by both badge types.
-            The colors are set separately below.
-        */
-        .badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        /*
-            Green badge for free scholarships.
-            Light green background, dark green text.
-            Green = good = free! Easy to understand.
-        */
-        .badge-free {
-            background: #e0fdf4;
-            color: #10b981;
-        }
-
-        /*
-            Red badge for scholarships with fees.
-            Light red background, dark red text.
-            Red = warning = costs money.
-        */
-        .badge-paid {
-            background: #fff0f0;
-            color: #ef4444;
-        }
-
-        /*
-            =============================================
-            APPLY BUTTON
-            The purple button at the bottom of each card.
-            "display: block" makes it take the full width.
-            "text-decoration: none" removes the underline
-            that links normally have.
-            =============================================
-        */
-        .apply-btn {
-            display: block;
-            text-align: center;
-            margin-top: 14px;
-            padding: 10px;
-            background: #6c63ff;
-            color: white;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-
-        /* Darker purple when hovering the apply button */
-        .apply-btn:hover {
-            background: #574fd6;
-        }
-
-        /*
-            =============================================
-            SAVE BUTTON
-            Sits below the apply button on each card.
-            Outlined purple style so it doesn't compete
-            with the solid purple apply button.
-            Only shows up when the user is logged in.
-            =============================================
-        */
-        .save-btn {
-            display: block;
-            text-align: center;
-            margin-top: 8px;
-            padding: 10px;
-            background: white;
-            color: #6c63ff;
-            border: 2px solid #6c63ff;
-            border-radius: 10px;
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        /*
-            When hovering the save button,
-            it fills with purple — same as apply button.
-            This gives clear visual feedback.
-        */
-        .save-btn:hover {
-            background: #6c63ff;
-            color: white;
-        }
-
-        /*
-            =============================================
-            EMPTY STATE
-            If no scholarships match the filters,
-            we show a friendly message instead of
-            just showing nothing — that would be confusing!
-            "grid-column: 1 / -1" makes this message
-            span across ALL columns in the grid
-            so it appears centered and full width.
-            =============================================
-        */
-        .empty {
-            text-align: center;
-            color: #888;
-            font-size: 1rem;
-            margin-top: 60px;
-            grid-column: 1 / -1;
-        }
-
+        .empty { text-align: center; color: #888; font-size: 1rem; margin-top: 60px; grid-column: 1 / -1; }
     </style>
 </head>
 <body>
 
-    <!--
-        =============================================
-        NAVBAR
-        The bar at the very top of the page.
-        Flask automatically makes "session" available
-        in every template so we can check login status.
-        =============================================
-    -->
     <nav class="navbar">
-
-        <!-- Left side — clicking the logo goes back to homepage -->
         <a href="/" class="nav-logo">🎓 Scholarship Portal</a>
-
-        <!-- Right side — buttons change based on login status -->
         <div class="nav-links">
-
-            <!--
-                If the user is logged in (session has user_id),
-                show My List link and Log Out button
-            -->
             {% if session.get("user_id") %}
                 <a href="/my-list" class="nav-btn nav-login">📋 My List</a>
                 <a href="/logout" class="nav-btn nav-logout">Log Out</a>
-
-            <!--
-                If the user is NOT logged in,
-                show Log In and Sign Up buttons
-            -->
             {% else %}
                 <a href="/login" class="nav-btn nav-login">Log In</a>
                 <a href="/signup" class="nav-btn nav-signup">Sign Up</a>
             {% endif %}
-
         </div>
-
     </nav>
 
-    <!--
-        =============================================
-        PAGE HEADER
-        Just the title and subtitle at the top.
-        =============================================
-    -->
     <div class="header">
         <h1>🎓 Scholarship Portal</h1>
         <p>Find and track scholarships from around the world</p>
     </div>
 
-    <!--
-        =============================================
-        FILTER FORM
-        method="get" sends filters through the URL.
-        action="/" sends it to our home() route.
-        =============================================
-    -->
     <form class="filters" method="get" action="/">
-
-        <!-- Country dropdown -->
         <select name="country">
             <option value="">🌍 All Countries</option>
             <option value="France">France</option>
@@ -596,8 +83,6 @@
             <option value="Canada">Canada</option>
             <option value="USA">USA</option>
         </select>
-
-        <!-- Field dropdown -->
         <select name="field">
             <option value="">📚 All Fields</option>
             <option value="Computer Science">Computer Science</option>
@@ -605,104 +90,63 @@
             <option value="Medicine">Medicine</option>
             <option value="Engineering">Engineering</option>
         </select>
-
-        <!-- Free only checkbox -->
         <label>
             <input type="checkbox" name="is_free">
             ✅ Free only
         </label>
-
-        <!-- Submit button -->
         <button type="submit">🔍 Filter</button>
-
     </form>
 
-    <!--
-        =============================================
-        SCHOLARSHIPS GRID
-        Flask fetched the data and passed it here
-        as the "scholarships" variable.
-
-        Each row "s" is now a tuple like:
-        (id, title, university, country, field,
-         deadline, is_free, requirements, link)
-         s[0] s[1]  s[2]       s[3]     s[4]
-         s[5]    s[6]     s[7]         s[8]
-        =============================================
-    -->
     <div class="grid">
-
         {% for s in scholarships %}
-
             <div class="card">
-
-                <!-- Colored accent bar — color set by CSS automatically -->
                 <div class="card-accent"></div>
 
-                <!-- s[1] = title -->
+                <!-- s[0]=id, s[1]=title, s[2]=university, s[3]=country -->
+                <!-- s[4]=field, s[5]=deadline, s[6]=is_free -->
+                <!-- s[7]=requirements, s[8]=link -->
+
                 <h2>{{ s[1] }}</h2>
 
-                <!-- s[2] = university -->
                 <div class="card-info">
                     <span>🏫 University:</span> {{ s[2] }}
                 </div>
-
-                <!-- s[3] = country -->
                 <div class="card-info">
                     <span>🌍 Country:</span> {{ s[3] }}
                 </div>
-
-                <!-- s[4] = field -->
                 <div class="card-info">
                     <span>📚 Field:</span> {{ s[4] }}
                 </div>
-
-                <!-- s[7] = requirements -->
                 <div class="card-info">
                     <span>📋 Requirements:</span> {{ s[7] }}
                 </div>
 
-                <!-- Footer: deadline + free/paid badge -->
                 <div class="card-footer">
-
-                    <!-- s[5] = deadline -->
                     <div class="deadline">⏰ Deadline: {{ s[5] }}</div>
-
-                    <!--
-                        s[6] = is_free
-                        1 = free → green badge
-                        0 = has fees → red badge
-                    -->
                     {% if s[6] == 1 %}
                         <span class="badge badge-free">✅ Free</span>
                     {% else %}
                         <span class="badge badge-paid">💰 Has Fees</span>
                     {% endif %}
-
                 </div>
 
-                <!-- s[8] = link — opens in new tab -->
+                <!-- Apply button — opens official link in new tab -->
                 <a href="{{ s[8] }}" target="_blank" class="apply-btn">Apply Now →</a>
 
-                <!--
-                    SAVE BUTTON
-                    Only shows if the user is logged in.
-                    Sends s[0] (the scholarship id) to Flask
-                    so it knows which one to save.
-                -->
+                <!-- Details button — opens review page -->
+                <a href="/scholarship/{{ s[0] }}" class="details-btn">💬 Reviews & Details</a>
+
+                <!-- Save button — only shows if logged in -->
                 {% if session.get("user_id") %}
                     <a href="/save/{{ s[0] }}" class="save-btn">🔖 Save to My List</a>
                 {% endif %}
 
             </div>
-
         {% endfor %}
 
-        <!-- Show this if no scholarships matched the filters -->
         {% if not scholarships %}
             <div class="empty">😕 No scholarships found. Try different filters!</div>
         {% endif %}
-
     </div>
 
 </body>

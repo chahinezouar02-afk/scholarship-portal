@@ -57,6 +57,28 @@ def init_db():
         )
     """)
 
+    # Create the reviews table
+# This stores ratings and comments left by users
+# user_id = who left the review
+# scholarship_id = which scholarship they reviewed
+# rating = number from 1 to 5 stars
+# comment = what they wrote
+# created_at = automatically set to when they submitted it
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        scholarship_id INTEGER NOT NULL,
+        rating INTEGER NOT NULL,
+        comment TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+
+
+
+
+
     # Create the users table if it doesn't exist yet
     # id = unique number for each user
     # email = must be unique, no two users can have the same email
@@ -407,7 +429,91 @@ def remove_scholarship(scholarship_id):
     # Send them back to their list
     return redirect(url_for("my_list"))
 
+    # This route shows the detail page for one scholarship
+# <int:scholarship_id> means Flask reads the id from the URL
+# For example: /scholarship/1 shows scholarship with id 1
+@app.route("/scholarship/<int:scholarship_id>")
+def scholarship_detail(scholarship_id):
 
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Fetch the scholarship with this specific id
+    cursor.execute("""
+        SELECT id, title, university, country, field,
+               deadline, is_free, requirements, link
+        FROM scholarships
+        WHERE id = ?
+    """, (scholarship_id,))
+    scholarship = cursor.fetchone()
+
+    # Fetch all reviews for this scholarship
+    # We also get the email of the user who left each review
+    # so we can show "reviewed by user@email.com"
+    cursor.execute("""
+        SELECT r.rating, r.comment, r.created_at, u.email
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.scholarship_id = ?
+        ORDER BY r.created_at DESC
+    """, (scholarship_id,))
+    reviews = cursor.fetchall()
+
+    # Calculate the average rating
+    # If there are no reviews yet, average is 0
+    cursor.execute("""
+        SELECT AVG(rating) FROM reviews
+        WHERE scholarship_id = ?
+    """, (scholarship_id,))
+    avg = cursor.fetchone()[0]
+    average_rating = round(avg, 1) if avg else 0
+
+    conn.close()
+
+    return render_template("scholarship_detail.html",
+        scholarship=scholarship,
+        reviews=reviews,
+        average_rating=average_rating
+    )
+
+
+# This route handles submitting a review
+@app.route("/review/<int:scholarship_id>", methods=["POST"])
+def submit_review(scholarship_id):
+
+    # Only logged in users can leave reviews
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+
+    # Read the rating and comment from the form
+    rating = request.form.get("rating")
+    comment = request.form.get("comment")
+
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+
+    # Check if this user already reviewed this scholarship
+    # One review per user per scholarship
+    cursor.execute("""
+        SELECT * FROM reviews
+        WHERE user_id = ? AND scholarship_id = ?
+    """, (user_id, scholarship_id))
+    already_reviewed = cursor.fetchone()
+
+    if not already_reviewed:
+        # Save the review to the database
+        cursor.execute("""
+            INSERT INTO reviews (user_id, scholarship_id, rating, comment)
+            VALUES (?, ?, ?, ?)
+        """, (user_id, scholarship_id, rating, comment))
+        conn.commit()
+
+    conn.close()
+
+    # Send them back to the detail page
+    return redirect(url_for("scholarship_detail", scholarship_id=scholarship_id))
 
 
 
