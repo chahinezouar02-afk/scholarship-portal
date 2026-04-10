@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scholarship Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f0f4ff; padding: 40px 20px; }
+
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; margin: -40px -20px 40px -20px; }
+        .nav-logo { font-size: 1.1rem; font-weight: 700; color: #3b3b98; text-decoration: none; }
+        .nav-links { display: flex; gap: 10px; }
+        .nav-btn { padding: 8px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: opacity 0.2s; }
+        .nav-btn:hover { opacity: 0.85; }
+        .nav-login { background: white; color: #6c63ff; border: 2px solid #6c63ff; }
+        .nav-logout { background: #fff0f0; color: #ef4444; }
+
+        /* Main container — centers everything on the page */
+        .container { max-width: 800px; margin: 0 auto; }
+
+        /*
+            SCHOLARSHIP INFO CARD
+            The big white box at the top showing
+            all the details of this scholarship.
+        */
+        .scholarship-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 32px;
+        }
+
+        /* Colored bar at top — same as homepage cards */
+        .card-accent { height: 6px; border-radius: 10px; margin-bottom: 20px; background: #6c63ff; }
+
+        /* Scholarship title */
+        .scholarship-card h1 { font-size: 1.6rem; font-weight: 700; color: #2d2d2d; margin-bottom: 16px; }
+
+        /* Each info row */
+        .info-row { font-size: 0.9rem; color: #555; margin-bottom: 10px; }
+        .info-row span { font-weight: 600; color: #3b3b98; }
+
+        /* Footer with deadline and badge */
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #f0f0f0; }
+        .deadline { font-size: 0.9rem; color: #888; }
+        .badge { font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+        .badge-free { background: #e0fdf4; color: #10b981; }
+        .badge-paid { background: #fff0f0; color: #ef4444; }
+
+        /* Apply button */
+        .apply-btn { display: inline-block; margin-top: 20px; padding: 12px 28px; background: #6c63ff; color: white; border-radius: 10px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: background 0.2s; }
+        .apply-btn:hover { background: #574fd6; }
+
+        /*
+            AVERAGE RATING BOX
+            Shows the overall star rating for this scholarship
+            based on all the reviews people left.
+        */
+        .avg-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f4ff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #3b3b98;
+            margin-top: 16px;
+        }
+
+        /*
+            REVIEWS SECTION
+            The area below the scholarship info
+            where all the user reviews are shown.
+        */
+        .reviews-section { margin-bottom: 32px; }
+        .reviews-section h2 { font-size: 1.3rem; font-weight: 700; color: #3b3b98; margin-bottom: 20px; }
+
+        /*
+            Each individual review card.
+            White box with soft shadow.
+        */
+        .review-card {
+            background: white;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        /* Top row of review — stars on left, email on right */
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+
+        /* The star rating display */
+        .stars { font-size: 1.1rem; }
+
+        /* The email of the person who left the review */
+        .reviewer { font-size: 0.78rem; color: #aaa; }
+
+        /* The actual comment text */
+        .review-comment { font-size: 0.88rem; color: #555; line-height: 1.6; }
+
+        /* The date the review was left */
+        .review-date { font-size: 0.75rem; color: #bbb; margin-top: 8px; }
+
+        /* Message shown when there are no reviews yet */
+        .no-reviews { text-align: center; color: #aaa; padding: 30px; background: white; border-radius: 14px; }
+
+        /*
+            LEAVE A REVIEW FORM
+            The form at the bottom where logged in
+            users can submit their own review.
+        */
+        .review-form {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .review-form h2 { font-size: 1.2rem; font-weight: 700; color: #3b3b98; margin-bottom: 20px; }
+
+        /* Each input group — label above input */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #3b3b98; margin-bottom: 6px; }
+
+        /* Star rating dropdown */
+        .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e0e0ff; border-radius: 10px; font-size: 0.88rem; font-family: 'Poppins', sans-serif; color: #2d2d2d; }
+        .form-group select:focus { outline: none; border-color: #6c63ff; }
+
+        /* Comment text area */
+        .form-group textarea { width: 100%; padding: 12px 14px; border: 2px solid #e0e0ff; border-radius: 10px; font-size: 0.88rem; font-family: 'Poppins', sans-serif; color: #2d2d2d; resize: vertical; min-height: 100px; }
+        .form-group textarea:focus { outline: none; border-color: #6c63ff; }
+
+        /* Submit button */
+        .submit-btn { width: 100%; padding: 12px; background: #6c63ff; color: white; border: none; border-radius: 10px; font-size: 0.95rem; font-family: 'Poppins', sans-serif; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+        .submit-btn:hover { background: #574fd6; }
+
+        /* Message shown to guests who are not logged in */
+        .login-prompt { text-align: center; padding: 20px; background: white; border-radius: 14px; color: #888; font-size: 0.9rem; }
+        .login-prompt a { color: #6c63ff; font-weight: 600; text-decoration: none; }
+        .login-prompt a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="/" class="nav-logo">🎓 Scholarship Portal</a>
+        <div class="nav-links">
+            {% if session.get("user_id") %}
+                <a href="/my-list" class="nav-btn nav-login">📋 My List</a>
+                <a href="/logout" class="nav-btn nav-logout">Log Out</a>
+            {% else %}
+                <a href="/login" class="nav-btn nav-login">Log In</a>
+                <a href="/signup" class="nav-btn nav-signup" style="background:#6c63ff;color:white;">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!--
+            SCHOLARSHIP INFO CARD
+            Shows all the details of this scholarship.
+            "scholarship" is the variable Flask passed us.
+            scholarship[0]=id, scholarship[1]=title, etc.
+        -->
+        <div class="scholarship-card">
+            <div class="card-accent"></div>
+
+            <h1>{{ scholarship[1] }}</h1>
+
+            <div class="info-row"><span>🏫 University:</span> {{ scholarship[2] }}</div>
+            <div class="info-row"><span>🌍 Country:</span> {{ scholarship[3] }}</div>
+            <div class="info-row"><span>📚 Field:</span> {{ scholarship[4] }}</div>
+            <div class="info-row"><span>📋 Requirements:</span> {{ scholarship[7] }}</div>
+
+            <div class="card-footer">
+                <div class="deadline">⏰ Deadline: {{ scholarship[5] }}</div>
+                {% if scholarship[6] == 1 %}
+                    <span class="badge badge-free">✅ Free</span>
+                {% else %}
+                    <span class="badge badge-paid">💰 Has Fees</span>
+                {% endif %}
+            </div>
+
+            <!--
+                Average rating box.
+                Shows ⭐ 4.5 / 5 for example.
+                If no reviews yet, shows "No ratings yet"
+            -->
+            {% if average_rating > 0 %}
+                <div class="avg-rating">⭐ {{ average_rating }} / 5 average rating</div>
+            {% else %}
+                <div class="avg-rating">⭐ No ratings yet</div>
+            {% endif %}
+
+            <a href="{{ scholarship[8] }}" target="_blank" class="apply-btn">Apply Now →</a>
+        </div>
+
+        <!--
+            REVIEWS SECTION
+            Shows all existing reviews left by users.
+        -->
+        <div class="reviews-section">
+            <h2>💬 What people are saying</h2>
+
+            <!--
+                Loop through all reviews.
+                Each review "r" is a tuple:
+                (rating, comment, created_at, email)
+                 r[0]    r[1]     r[2]        r[3]
+            -->
+            {% for r in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+
+                        <!--
+                            Show stars based on rating.
+                            We use a loop that repeats ⭐ r[0] times.
+                            For example rating 4 shows ⭐⭐⭐⭐
+                        -->
+                        <div class="stars">
+                            {% for i in range(r[0]) %}⭐{% endfor %}
+                        </div>
+
+                        <!-- Show only first part of email for privacy -->
+                        <!-- For example "chahine@gmail.com" shows as "chahine" -->
+                        <div class="reviewer">{{ r[3].split('@')[0] }}</div>
+                    </div>
+
+                    <!-- The comment they wrote -->
+                    <div class="review-comment">{{ r[1] }}</div>
+
+                    <!-- When they wrote it -->
+                    <div class="review-date">{{ r[2] }}</div>
+                </div>
+            {% endfor %}
+
+            <!-- If no reviews yet, show a friendly message -->
+            {% if not reviews %}
+                <div class="no-reviews">😕 No reviews yet — be the first to share your experience!</div>
+            {% endif %}
+        </div>
+
+        <!--
+            REVIEW FORM
+            Only show this if the user is logged in.
+            If not logged in, show a prompt to log in instead.
+        -->
+        {% if session.get("user_id") %}
+            <div class="review-form">
+                <h2>⭐ Leave a Review</h2>
+
+                <!--
+                    method="POST" sends the form data to Flask.
+                    action="/review/scholarship[0]" sends it to
+                    our submit_review() route with the scholarship id.
+                -->
+                <form method="POST" action="/review/{{ scholarship[0] }}">
+
+                    <!-- Star rating dropdown -->
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <select name="rating" required>
+                            <option value="">Choose a rating...</option>
+                            <option value="5">⭐⭐⭐⭐⭐ — Excellent</option>
+                            <option value="4">⭐⭐⭐⭐ — Good</option>
+                            <option value="3">⭐⭐⭐ — Average</option>
+                            <option value="2">⭐⭐ — Below average</option>
+                            <option value="1">⭐ — Poor</option>
+                        </select>
+                    </div>
+
+                    <!-- Comment text area -->
+                    <div class="form-group">
+                        <label>Your Experience</label>
+                        <textarea name="comment" placeholder="Share your experience with this scholarship..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Review →</button>
+                </form>
+            </div>
+
+        {% else %}
+            <!--
+                If not logged in, show a prompt instead of the form.
+                Users must be logged in to leave reviews.
+            -->
+            <div class="login-prompt">
+                <a href="/login">Log in</a> to leave a review and share your experience!
+            </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

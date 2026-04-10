@@ -521,4 +521,4 @@ def submit_review(scholarship_id):
 # This block only runs if we start the app directly with: python app.py
 if __name__ == "__main__":
     # debug=True shows us helpful error messages while we're developing
-    app.run(debug=True, host="localhost")
+    app.run(debug=True, host="localhost")    
