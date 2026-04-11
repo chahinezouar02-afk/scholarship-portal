@@ -516,6 +516,115 @@ def submit_review(scholarship_id):
     return redirect(url_for("scholarship_detail", scholarship_id=scholarship_id))
 
 
+# =============================================
+# ADMIN PAGE
+# Only accessible if the logged in user's email
+# matches YOUR email — no one else can get in
+# =============================================
+
+# Your email — change this to your actual email!
+ADMIN_EMAIL = "chahinezouar02@gmail.com"
+
+# This route SHOWS the admin page
+@app.route("/admin")
+def admin():
+    # Check if user is logged in
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    # Connect to database to get the logged in user's email
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM users WHERE id = ?", (session["user_id"],))
+    user = cursor.fetchone()
+
+    # Check if this user's email is the admin email
+    # If not, show access denied
+    if not user or user[0] != ADMIN_EMAIL:
+        conn.close()
+        return "<h1>Access Denied</h1><p>You are not allowed to view this page.</p>", 403
+
+    # Fetch all scholarships to display them
+    cursor.execute("SELECT id, title, university, country, deadline FROM scholarships")
+    scholarships = cursor.fetchall()
+    conn.close()
+
+    return render_template("admin.html", scholarships=scholarships)
+
+
+# This route HANDLES adding a new scholarship
+@app.route("/admin/add", methods=["POST"])
+def admin_add():
+    # Same security check
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM users WHERE id = ?", (session["user_id"],))
+    user = cursor.fetchone()
+
+    if not user or user[0] != ADMIN_EMAIL:
+        conn.close()
+        return "<h1>Access Denied</h1>", 403
+
+    # Read all the form fields
+    title = request.form.get("title")
+    university = request.form.get("university")
+    country = request.form.get("country")
+    field = request.form.get("field")
+    deadline = request.form.get("deadline")
+    is_free = request.form.get("is_free")
+    requirements = request.form.get("requirements")
+    link = request.form.get("link")
+
+    # is_free comes as "1" or "0" from the form
+    # we convert it to an integer for the database
+    is_free = int(is_free)
+
+    # Insert the new scholarship into the database
+    cursor.execute("""
+        INSERT INTO scholarships
+        (title, university, country, field, deadline, is_free, requirements, link)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (title, university, country, field, deadline, is_free, requirements, link))
+
+    conn.commit()
+    conn.close()
+
+    # Go back to admin page after adding
+    return redirect(url_for("admin"))
+
+
+# This route HANDLES deleting a scholarship
+@app.route("/admin/delete/<int:scholarship_id>")
+def admin_delete(scholarship_id):
+    # Same security check
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    conn = sqlite3.connect("internships.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT email FROM users WHERE id = ?", (session["user_id"],))
+    user = cursor.fetchone()
+
+    if not user or user[0] != ADMIN_EMAIL:
+        conn.close()
+        return "<h1>Access Denied</h1>", 403
+
+    # Delete the scholarship from the database
+    cursor.execute("DELETE FROM scholarships WHERE id = ?", (scholarship_id,))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for("admin"))
+
+
+
+
+
+
+
 
 
 # This block only runs if we start the app directly with: python app.py
